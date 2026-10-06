@@ -1,0 +1,11 @@
+import { isSupabaseConfigured } from '../supabase/client';
+import * as mock from './mock/analytics';
+import * as live from './supabase/analytics';
+const s = isSupabaseConfigured ? live : mock;
+export const adminOverview = s.adminOverview;
+export const listCustomers = s.listCustomers;
+export const listCategories = s.listCategories;
+export const saveCategory = s.saveCategory;
+export const deleteCategory = s.deleteCategory;
+export const publicCategories = s.publicCategories;
+export { summarize, dailySeries } from './calc';

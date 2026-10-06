@@ -1,0 +1,13 @@
+import { isSupabaseConfigured } from '../supabase/client';
+import * as mock from './mock/products';
+import * as live from './supabase/products';
+const s = isSupabaseConfigured ? live : mock;
+export const listProducts = s.listProducts;
+export const getProduct = s.getProduct;
+export const getProductsByIds = s.getProductsByIds;
+export const relatedProducts = s.relatedProducts;
+export const listShopProducts = s.listShopProducts;
+export const listAllProducts = s.listAllProducts;
+export const saveProduct = s.saveProduct;
+export const deleteProduct = s.deleteProduct;
+export type { ProductFilters } from './mock/products';

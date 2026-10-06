@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { scroll-behavior: smooth; }
+body { @apply bg-white text-slate-800 antialiased font-sans; }
+h1, h2, h3, h4 { @apply font-display tracking-tight text-indigo-800; }
+:focus-visible { outline: 2px solid #F0A202; outline-offset: 2px; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply bg-indigo text-white hover:bg-indigo-600; }
+  .btn-gold { @apply bg-marigold text-indigo-900 hover:bg-marigold-600 hover:text-white; }
+  .btn-danger { @apply bg-crimson text-white hover:bg-crimson-700; }
+  .btn-outline { @apply border border-line bg-white text-indigo-800 hover:border-indigo hover:bg-indigo-50; }
+  .btn-ghost { @apply text-slate-700 hover:bg-slate-100; }
+  .btn-sm { @apply px-3 py-1.5 text-xs; }
+  .input { @apply w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:border-indigo focus:outline-none focus:ring-2 focus:ring-indigo/20; }
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+  .card { @apply rounded-xl border border-line bg-white; }
+  .th { @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 whitespace-nowrap bg-surface; }
+  .td { @apply px-4 py-3 text-sm whitespace-nowrap; }
+}
+
+/* ajrak-inspired lattice used behind the hero */
+.lattice {
+  background-color: #1E2A5A;
+  background-image:
+    linear-gradient(45deg, rgba(240,162,2,.14) 25%, transparent 25%, transparent 75%, rgba(240,162,2,.14) 75%),
+    linear-gradient(45deg, rgba(163,22,47,.35) 25%, transparent 25%, transparent 75%, rgba(163,22,47,.35) 75%);
+  background-size: 56px 56px;
+  background-position: 0 0, 28px 28px;
+}
+.toast-in { animation: toast-in .22s ease-out; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.skeleton { @apply animate-pulse rounded-md bg-slate-200/70; }
+@media (prefers-reduced-motion: reduce) { .toast-in, .skeleton { animation: none; } html { scroll-behavior: auto; } }

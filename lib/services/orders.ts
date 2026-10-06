@@ -1,0 +1,10 @@
+import { isSupabaseConfigured } from '../supabase/client';
+import * as mock from './mock/orders';
+import * as live from './supabase/orders';
+const s = isSupabaseConfigured ? live : mock;
+export const placeOrder = s.placeOrder;
+export const listCustomerOrders = s.listCustomerOrders;
+export const listShopOrders = s.listShopOrders;
+export const listAllOrders = s.listAllOrders;
+export const updateOrderStatus = s.updateOrderStatus;
+export { nextStatuses } from './calc';
