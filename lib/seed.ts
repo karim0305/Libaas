@@ -36,7 +36,7 @@ export const profiles: Profile[] = [
   { id: 'u-c6', email: 'zain@example.com', name: 'Zain Abbas', role: 'customer', phone: '0345 6789012' },
 ];
 
-export const shops: Shop[] = [
+const baseShops: Omit<Shop, 'delivery_charge' | 'free_delivery_above'>[] = [
   { id: 's1', owner_id: 'u-s1', name: 'Khaddar House', slug: 'khaddar-house', city: 'Lahore', phone: '0300 1112233', status: 'active', created_at: daysAgo(160),
     description: 'Hand-picked khaddar and cotton shalwar kameez, cut and stitched in Gulberg since 2009.' },
   { id: 's2', owner_id: 'u-s2', name: 'Karachi Kurta Co.', slug: 'karachi-kurta-co', city: 'Karachi', phone: '0321 4455667', status: 'active', created_at: daysAgo(140),
@@ -54,6 +54,8 @@ export const shops: Shop[] = [
   { id: 's8', owner_id: 'u-s8', name: 'Shawl Gali Peshawar', slug: 'shawl-gali-peshawar', city: 'Peshawar', phone: '0334 2020202', status: 'inactive', created_at: daysAgo(70),
     description: 'Wool and pashmina shawls from Peshawar’s Qissa Khwani bazaar.' },
 ];
+const DELIVERY: [number, number | null][] = [[250, 5000], [200, 3000], [300, null], [250, 5000], [400, 10000], [150, 2000], [250, 5000], [250, 5000]];
+export const shops: Shop[] = baseShops.map((s, i) => ({ ...s, delivery_charge: DELIVERY[i][0], free_delivery_above: DELIVERY[i][1] }));
 
 type P = [string, string, string, number, number, number, string[], string[], boolean];
 const S = ['S', 'M', 'L', 'XL'];
@@ -95,7 +97,7 @@ export const products: Product[] = tmpl.map(([name, shop_id, category_id, price,
 const cities = ['Lahore', 'Karachi', 'Islamabad', 'Faisalabad', 'Multan', 'Rawalpindi', 'Gujranwala', 'Hyderabad'];
 const streets = ['House 12, Street 4, Gulshan Colony', 'Flat 7, Block C, Satellite Town', 'House 88, Model Town', 'Plot 15, Sector F-10', 'House 3, Street 9, Johar Town'];
 const customers = profiles.filter((p) => p.role === 'customer');
-const statusPool: OrderStatus[] = ['delivered', 'delivered', 'delivered', 'delivered', 'delivered', 'shipped', 'processing', 'confirmed', 'pending', 'pending', 'cancelled'];
+const statusPool: OrderStatus[] = ['delivered', 'delivered', 'delivered', 'delivered', 'delivered', 'shipped', 'processing', 'confirmed', 'referred', 'pending', 'cancelled'];
 const activeProducts = products.filter((p) => shops.find((s) => s.id === p.shop_id)!.status === 'active');
 
 export const orders: Order[] = Array.from({ length: 64 }, (_, i) => {
@@ -110,12 +112,14 @@ export const orders: Order[] = Array.from({ length: 64 }, (_, i) => {
   });
   const subtotal = items.reduce((s, it) => s + it.unit_price * it.quantity, 0);
   const age = Math.floor((i / 64) * 75);
-  const status = age < 3 ? pick<OrderStatus>(['pending', 'confirmed']) : pick(statusPool);
+  const status = age < 3 ? pick<OrderStatus>(['pending', 'referred']) : pick(statusPool);
   const delivered = status === 'delivered';
   const commission_amount = delivered ? Math.round(subtotal * 0.05) : 0;
+  const created_at = daysAgo(75 - age);
+  const delivery_charge = shop.free_delivery_above != null && subtotal >= shop.free_delivery_above ? 0 : shop.delivery_charge;
   return {
     id: `o${i + 1}`, order_no: `LB-${26000 + i * 7 + 101}`, customer_id: c.id, customer_name: c.name, phone: c.phone ?? '',
     address: pick(streets), city: pick(cities), notes: '', shop_id: shop.id, shop_name: shop.name, status,
-    created_at: daysAgo(75 - age), items, subtotal, commission_amount, shop_earning: delivered ? subtotal - commission_amount : 0,
+    created_at, referred_at: status === 'pending' ? null : created_at, delivered_at: delivered ? created_at : null, delivery_charge, items, subtotal, commission_amount, shop_earning: delivered ? subtotal - commission_amount : 0,
   };
 }).sort((a, b) => b.created_at.localeCompare(a.created_at));

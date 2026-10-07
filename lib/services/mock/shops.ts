@@ -19,7 +19,7 @@ export async function setShopStatus(id: string, status: ShopStatus): Promise<voi
   mutate(() => { const s = db.shops.find((x) => x.id === id); if (s) s.status = status; });
 }
 
-export async function updateShop(id: string, patch: Partial<Pick<Shop, 'name' | 'description' | 'city' | 'phone'>>): Promise<void> {
+export async function updateShop(id: string, patch: Partial<Pick<Shop, 'name' | 'description' | 'city' | 'phone' | 'delivery_charge' | 'free_delivery_above'>>): Promise<void> {
   await delay();
   mutate(() => { const s = db.shops.find((x) => x.id === id); if (s) Object.assign(s, patch); });
 }
@@ -32,7 +32,7 @@ export async function registerShop(input: { owner_name: string; email: string; p
   const user: Profile = { id: userId, email: input.email, name: input.owner_name, phone: input.phone, role: 'shop', shop_id: shopId };
   mutate(() => {
     db.profiles.push(user);
-    db.shops.push({ id: shopId, owner_id: userId, name: input.shop_name, slug: input.shop_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: input.description, city: input.city, phone: input.phone, status: 'pending', created_at: new Date().toISOString() });
+    db.shops.push({ id: shopId, owner_id: userId, name: input.shop_name, slug: input.shop_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: input.description, city: input.city, phone: input.phone, status: 'pending', delivery_charge: 250, free_delivery_above: 5000, created_at: new Date().toISOString() });
   });
   localStorage.setItem('libaas_session', userId);
   return user;

@@ -6,12 +6,12 @@
 import { categories, orders, products, profiles, shops } from './seed';
 import type { Category, Order, Product, Profile, Shop } from './types';
 
-interface DB { shops: Shop[]; products: Product[]; categories: Category[]; profiles: Profile[]; orders: Order[] }
+interface DB { shops: Shop[]; products: Product[]; categories: Category[]; profiles: Profile[]; orders: Order[]; settings: { commission_rate: number } }
 
-const KEY = 'libaas_db_v1';
+const KEY = 'libaas_db_v2';
 export const db: DB = {
   shops: structuredClone(shops), products: structuredClone(products), categories: structuredClone(categories),
-  profiles: structuredClone(profiles), orders: structuredClone(orders),
+  profiles: structuredClone(profiles), orders: structuredClone(orders), settings: { commission_rate: 0.05 },
 };
 
 let hydrated = false;

@@ -6,7 +6,7 @@ export function summarize(orders: Order[]) {
   const delivered = orders.filter((o) => o.status === 'delivered');
   return {
     totalOrders: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
+    pending: orders.filter((o) => o.status === 'pending' || o.status === 'referred').length,
     delivered: delivered.length,
     cancelled: orders.filter((o) => o.status === 'cancelled').length,
     sales: sum(delivered.map((o) => o.subtotal)),
@@ -39,15 +39,21 @@ export function buildOverview(orders: Order[], shops: { id: string; name: string
   orders.filter((o) => o.status === 'delivered').forEach((o) => o.items.forEach((i) => prod.set(i.name, (prod.get(i.name) ?? 0) + i.quantity * i.unit_price)));
   const topProducts = [...prod.entries()].map(([name, sales]) => ({ name, sales })).sort((a, b) => b.sales - a.sales).slice(0, 5);
   return {
-    ...s, shops: shops.length, activeShops: shops.filter((x) => x.status === 'active').length, pendingShops: shops.filter((x) => x.status === 'pending').length,
+    ...s, toRefer: orders.filter((o) => o.status === 'pending').length, shops: shops.length, activeShops: shops.filter((x) => x.status === 'active').length, pendingShops: shops.filter((x) => x.status === 'pending').length,
     customers, products, series: dailySeries(orders), topShops, topProducts,
   };
 }
 
-/** Statuses a shop may move an order to from its current status. */
-export function nextStatuses(s: OrderStatus): OrderStatus[] {
+/**
+ * Which statuses may a user move an order to?
+ * Admin: refer a pending order to its shop (or cancel it). Only the admin can refer.
+ * Shop:  works on referred orders: confirm -> processing -> shipped -> delivered.
+ * The database trigger guard_status enforces the same rules.
+ */
+export function nextStatuses(s: OrderStatus, role: 'admin' | 'shop' = 'shop'): OrderStatus[] {
+  if (role === 'admin') return s === 'pending' ? ['referred', 'cancelled'] : s === 'referred' || s === 'confirmed' ? ['cancelled'] : [];
   const flow: Record<OrderStatus, OrderStatus[]> = {
-    pending: ['confirmed', 'cancelled'], confirmed: ['processing', 'cancelled'], processing: ['shipped', 'cancelled'],
+    pending: [], referred: ['confirmed', 'cancelled'], confirmed: ['processing', 'cancelled'], processing: ['shipped', 'cancelled'],
     shipped: ['delivered', 'cancelled'], delivered: [], cancelled: [],
   };
   return flow[s];

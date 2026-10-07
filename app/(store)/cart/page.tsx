@@ -7,6 +7,7 @@ import { getProductsByIds } from '@/lib/services/products';
 import ProductImage from '@/components/ui/ProductImage';
 import { EmptyState, Skeleton } from '@/components/ui/States';
 import { rs } from '@/lib/format';
+import { calcDelivery } from '@/lib/delivery';
 
 export default function CartPage() {
   const cart = useCart(); const confirm = useConfirm(); const toast = useToast();
@@ -18,7 +19,7 @@ export default function CartPage() {
 
   const rows = cart.lines.map((l) => ({ l, p: q.data!.find((x) => x.id === l.product_id) })).filter((r) => r.p);
   const subtotal = rows.reduce((s, r) => s + r.p!.final_price * r.l.quantity, 0);
-  const delivery = subtotal >= 5000 ? 0 : 250;
+  const del = calcDelivery(rows.map((r) => ({ p: r.p!, quantity: r.l.quantity })));
   const remove = async (l: typeof cart.lines[number], name: string) => { if (await confirm({ title: 'Remove this item?', message: `${name} will be taken out of your cart.`, confirmLabel: 'Remove', danger: true })) { cart.remove(l); toast('Item removed from your cart.', 'info'); } };
 
   return (
@@ -44,7 +45,8 @@ export default function CartPage() {
         </ul>
         <aside className="card h-fit p-5">
           <h2 className="text-lg font-semibold">Order summary</h2>
-          <dl className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{rs(subtotal)}</dd></div><div className="flex justify-between"><dt>Delivery</dt><dd>{delivery ? rs(delivery) : 'Free'}</dd></div><div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><dt>Total to pay on delivery</dt><dd>{rs(subtotal + delivery)}</dd></div></dl>
+          <dl className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{rs(subtotal)}</dd></div>{del.shops.map((s) => <div key={s.shop_id} className="flex justify-between gap-3"><dt>Delivery{del.shops.length > 1 ? ` · ${s.shop_name}` : ''}</dt><dd>{s.charge ? rs(s.charge) : 'Free'}</dd></div>)}<div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><dt>Total to pay on delivery</dt><dd>{rs(subtotal + del.total)}</dd></div></dl>
+          {del.shops.filter((s) => s.charge > 0 && s.freeAbove != null).map((s) => <p key={s.shop_id} className="mt-2 text-xs text-slate-500">Add {rs((s.freeAbove as number) - s.subtotal)} more from {s.shop_name} for free delivery.</p>)}
           {rows.length > 0 && new Set(rows.map((r) => r.p!.shop_id)).size > 1 && <p className="mt-3 rounded-lg bg-marigold-50 p-3 text-xs text-slate-700">Your items come from {new Set(rows.map((r) => r.p!.shop_id)).size} shops, so they’ll arrive as separate orders.</p>}
           <Link href="/checkout" className="btn btn-primary mt-5 w-full py-3">Proceed to checkout</Link>
           <Link href="/products" className="btn btn-ghost mt-2 w-full">Keep shopping</Link>

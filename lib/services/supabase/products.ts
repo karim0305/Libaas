@@ -5,16 +5,16 @@ import type { Product, ProductView } from '../../types';
 import type { ProductFilters } from '../mock/products';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const SEL = '*, shops(name, status), categories(name), product_images(url, position)';
+const SEL = '*, shops(name, status, delivery_charge, free_delivery_above), categories(name), product_images(url, position)';
 
 function map(r: any): ProductView {
   const { shops, categories, product_images, ...p } = r;
   const images = [...(product_images ?? [])].sort((a: any, b: any) => a.position - b.position).map((i: any) => i.url);
-  return { ...p, price: Number(p.price), images, shop_name: shops?.name ?? 'Shop', category_name: categories?.name ?? 'Clothing', final_price: finalPrice(Number(p.price), p.discount_percent) };
+  return { ...p, price: Number(p.price), images, shop_name: shops?.name ?? 'Shop', delivery_charge: Number(shops?.delivery_charge ?? 0), free_delivery_above: shops?.free_delivery_above == null ? null : Number(shops.free_delivery_above), category_name: categories?.name ?? 'Clothing', final_price: finalPrice(Number(p.price), p.discount_percent) };
 }
 
 export async function listProducts(f: ProductFilters = {}): Promise<ProductView[]> {
-  let q: any = sb().from('products').select('*, shops!inner(name, status), categories(name), product_images(url, position)').eq('shops.status', 'active');
+  let q: any = sb().from('products').select('*, shops!inner(name, status, delivery_charge, free_delivery_above), categories(name), product_images(url, position)').eq('shops.status', 'active');
   if (f.category) q = q.eq('category_id', f.category);
   if (f.shop) q = q.eq('shop_id', f.shop);
   if (f.size) q = q.contains('sizes', [f.size]);
@@ -48,7 +48,7 @@ export async function getProductsByIds(ids: string[]): Promise<ProductView[]> {
 export async function relatedProducts(id: string): Promise<ProductView[]> {
   const p = await getProduct(id);
   if (!p) return [];
-  const rows = must<any[]>(await sb().from('products').select('*, shops!inner(name, status), categories(name), product_images(url, position)')
+  const rows = must<any[]>(await sb().from('products').select('*, shops!inner(name, status, delivery_charge, free_delivery_above), categories(name), product_images(url, position)')
     .eq('shops.status', 'active').neq('id', id).or(`category_id.eq.${p.category_id},shop_id.eq.${p.shop_id}`).limit(4));
   return rows.map(map);
 }

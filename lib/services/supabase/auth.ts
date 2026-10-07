@@ -1,5 +1,6 @@
 import { sb } from './_client';
 import type { Profile } from '../../types';
+import { TERMS_VERSION } from '../../terms';
 
 export async function loadProfile(uid: string, email: string): Promise<Profile> {
   const [p, s] = await Promise.all([
@@ -28,7 +29,7 @@ export const CONFIRM_HINT = 'Account created. Open the confirmation link we emai
 
 export async function signUp(email: string, password: string, name: string, phone: string) {
   if (password.length < 6) throw new Error('Password must be at least 6 characters.');
-  const { data, error } = await sb().auth.signUp({ email: email.trim(), password, options: { data: { full_name: name, phone } } });
+  const { data, error } = await sb().auth.signUp({ email: email.trim(), password, options: { data: { full_name: name, phone, terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION } } });
   if (error) throw new Error(/already/i.test(error.message) ? 'An account with this email already exists.' : error.message);
   if (data.user && data.user.identities?.length === 0) throw new Error('An account with this email already exists.');
   if (!data.session) throw new Error(CONFIRM_HINT);

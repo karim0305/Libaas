@@ -3,6 +3,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 import { getSession, logout as doLogout } from '@/lib/services/auth';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
+import { DEFAULT_COMMISSION_RATE } from '@/lib/commission';
+import { getPlatformSettings } from '@/lib/services/settings';
+import { subscribe } from '@/lib/store';
 import type { CartLine, Profile } from '@/lib/types';
 
 /* ---------- Toasts ---------- */
@@ -20,6 +23,11 @@ export const useConfirm = () => useContext(ConfirmCtx);
 interface AuthState { user: Profile | null; ready: boolean; refresh: () => void; logout: () => void }
 const AuthCtx = createContext<AuthState>({ user: null, ready: false, refresh: () => {}, logout: () => {} });
 export const useAuth = () => useContext(AuthCtx);
+
+/* ---------- Platform settings (commission rate set by the admin) ---------- */
+export const formatPct = (rate: number) => `${+(rate * 100).toFixed(2)}%`;
+const PlatformCtx = createContext({ rate: DEFAULT_COMMISSION_RATE, pct: formatPct(DEFAULT_COMMISSION_RATE) });
+export const usePlatform = () => useContext(PlatformCtx);
 
 /* ---------- Cart ---------- */
 interface CartState {
@@ -48,6 +56,14 @@ export default function Providers({ children }: { children: ReactNode }) {
   useEffect(refresh, [refresh]);
   const logout = useCallback(() => { setUser(null); void doLogout(); }, []);
 
+  const [rate, setRate] = useState(DEFAULT_COMMISSION_RATE);
+  useEffect(() => {
+    const load = () => { getPlatformSettings().then((s) => setRate(s.commission_rate)).catch(() => { /* keep default */ }); };
+    load();
+    return subscribe(load);
+  }, []);
+  const platform = useMemo(() => ({ rate, pct: formatPct(rate) }), [rate]);
+
   const [lines, setLines] = useState<CartLine[]>([]);
   useEffect(() => { try {
     const saved: CartLine[] = JSON.parse(localStorage.getItem('libaas_cart') ?? '[]');
@@ -69,7 +85,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       <ConfirmCtx.Provider value={confirm}>
         <AuthCtx.Provider value={{ user, ready, refresh, logout }}>
           <CartCtx.Provider value={cart}>
-            {children}
+            <PlatformCtx.Provider value={platform}>{children}</PlatformCtx.Provider>
             <div className="fixed bottom-4 right-4 left-4 sm:left-auto z-[100] flex flex-col gap-2 sm:w-96" aria-live="polite">
               {toasts.map((t) => (
                 <div key={t.id} className="toast-in flex items-start gap-3 rounded-lg bg-white border border-line shadow-lg p-3.5 text-sm">

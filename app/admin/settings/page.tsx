@@ -1,2 +1,3 @@
 import SettingsPanel from '@/components/SettingsPanel';
-export default function Page() { return <SettingsPanel admin />; }
+import CommissionSettings from '@/components/CommissionSettings';
+export default function Page() { return <SettingsPanel><CommissionSettings /></SettingsPanel>; }

@@ -2,6 +2,7 @@ import type { OrderStatus, ShopStatus } from '@/lib/types';
 
 const styles: Record<string, string> = {
   pending: 'bg-amber-50 text-amber-800 ring-amber-200',
+  referred: 'bg-orange-50 text-orange-800 ring-orange-200',
   confirmed: 'bg-sky-50 text-sky-800 ring-sky-200',
   processing: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
   shipped: 'bg-violet-50 text-violet-800 ring-violet-200',

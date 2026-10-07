@@ -20,7 +20,7 @@ export async function setShopStatus(id: string, status: ShopStatus): Promise<voi
   notify();
 }
 
-export async function updateShop(id: string, patch: Partial<Pick<Shop, 'name' | 'description' | 'city' | 'phone'>>): Promise<void> {
+export async function updateShop(id: string, patch: Partial<Pick<Shop, 'name' | 'description' | 'city' | 'phone' | 'delivery_charge' | 'free_delivery_above'>>): Promise<void> {
   must(await sb().from('shops').update(patch).eq('id', id));
   notify();
 }

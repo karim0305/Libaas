@@ -8,7 +8,7 @@ const SEL = '*, shops(name), order_items(product_id, name, quantity, unit_price,
 function map(r: any): Order {
   const { shops, order_items, ...o } = r;
   return { ...o, shop_name: shops?.name ?? 'Shop', items: (order_items ?? []).map((i: any) => ({ ...i, unit_price: Number(i.unit_price) })),
-    subtotal: Number(o.subtotal), commission_amount: Number(o.commission_amount), shop_earning: Number(o.shop_earning) };
+    delivery_charge: Number(o.delivery_charge ?? 0), subtotal: Number(o.subtotal), commission_amount: Number(o.commission_amount), shop_earning: Number(o.shop_earning) };
 }
 
 /** Prices, stock and splitting by shop are all handled inside the database function place_order(). */
@@ -24,16 +24,17 @@ export async function placeOrder(_userId: string, lines: CartLine[], d: Checkout
   return rows.map(map);
 }
 
-const list = async (col?: string, val?: string) => {
+const list = async (col?: string, val?: string, referredOnly = false) => {
   let q: any = sb().from('orders').select(SEL).order('created_at', { ascending: false });
   if (col && val) q = q.eq(col, val);
+  if (referredOnly) q = q.not('referred_at', 'is', null); // shops only see orders the admin referred
   return must<any[]>(await q).map(map);
 };
 export const listCustomerOrders = (userId: string) => list('customer_id', userId);
-export const listShopOrders = (shopId: string) => (UUID.test(shopId) ? list('shop_id', shopId) : Promise.resolve([] as Order[]));
+export const listShopOrders = (shopId: string) => (UUID.test(shopId) ? list('shop_id', shopId, true) : Promise.resolve([] as Order[]));
 export const listAllOrders = () => list();
 
-/** The database trigger writes commission_amount / shop_earning (5%) when status becomes 'delivered'. */
+/** The database trigger writes commission_amount / shop_earning (at the admin’s rate) when status becomes 'delivered'. */
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   must(await sb().from('orders').update({ status }).eq('id', id));
   notify();

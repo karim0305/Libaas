@@ -9,6 +9,7 @@ import { getProductsByIds } from '@/lib/services/products';
 import { placeOrder } from '@/lib/services/orders';
 import { EmptyState } from '@/components/ui/States';
 import { rs } from '@/lib/format';
+import { calcDelivery } from '@/lib/delivery';
 
 const CITIES = ['Lahore', 'Karachi', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta', 'Gujranwala', 'Sialkot', 'Hyderabad', 'Other'];
 
@@ -26,7 +27,7 @@ export default function Checkout() {
 
   const rows = cart.lines.map((l) => ({ l, p: q.data?.find((x) => x.id === l.product_id) })).filter((r) => r.p);
   const subtotal = rows.reduce((s, r) => s + r.p!.final_price * r.l.quantity, 0);
-  const delivery = subtotal >= 5000 ? 0 : 250;
+  const del = calcDelivery(rows.map((r) => ({ p: r.p!, quantity: r.l.quantity })));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +61,7 @@ export default function Checkout() {
         <aside className="card h-fit p-5">
           <h2 className="text-lg font-semibold">Your order</h2>
           <ul className="mt-4 divide-y divide-line text-sm">{rows.map(({ l, p }) => <li key={`${l.product_id}${l.size}${l.color}`} className="flex justify-between gap-3 py-2.5"><span>{p!.name}<span className="block text-xs text-slate-500">{l.size} · {l.color} · Qty {l.quantity}</span></span><span className="font-medium">{rs(p!.final_price * l.quantity)}</span></li>)}</ul>
-          <dl className="mt-3 space-y-2 border-t border-line pt-3 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{rs(subtotal)}</dd></div><div className="flex justify-between"><dt>Delivery</dt><dd>{delivery ? rs(delivery) : 'Free'}</dd></div><div className="flex justify-between text-base font-semibold"><dt>Pay on delivery</dt><dd>{rs(subtotal + delivery)}</dd></div></dl>
+          <dl className="mt-3 space-y-2 border-t border-line pt-3 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{rs(subtotal)}</dd></div>{del.shops.map((s) => <div key={s.shop_id} className="flex justify-between gap-3"><dt>Delivery{del.shops.length > 1 ? ` · ${s.shop_name}` : ''}</dt><dd>{s.charge ? rs(s.charge) : 'Free'}</dd></div>)}<div className="flex justify-between text-base font-semibold"><dt>Pay on delivery</dt><dd>{rs(subtotal + del.total)}</dd></div></dl>
           <button className="btn btn-gold mt-5 w-full py-3" disabled={busy || q.loading}>{busy ? 'Placing order…' : 'Place order'}</button>
         </aside>
       </form>

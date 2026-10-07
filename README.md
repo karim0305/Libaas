@@ -36,7 +36,7 @@ supabase/migrations/  schema, functions/triggers, RLS + storage policies
 
 ## Connect Supabase
 
-1. Create a project, then run `supabase/migrations/001…005` in order in the SQL editor (004 adds profile email, 005 seeds categories).
+1. Create a project, then run `supabase/migrations/001…008` in order in the SQL editor. Run **007 on its own** before 008 (new enum value). 004 adds profile email, 005 seeds categories, 006 limits product writes to approved shops, 008 adds the refer step, delivery charges and terms record.
 2. `cp .env.example .env.local` and fill in the project URL and anon key.
 3. Done in code: with the env vars set the app uses `lib/services/supabase/*`; without them it uses `lib/services/mock/*`.
    - auth → `supabase.auth.signInWithPassword / signUp / signOut`; shop signup → `rpc('register_shop')`
@@ -49,7 +49,9 @@ supabase/migrations/  schema, functions/triggers, RLS + storage policies
 
 ## Where business rules live
 
-- **Commission:** trigger `generate_commission` (rate in `platform_settings`). Only `delivered` creates a `commissions` row and sets `commission_amount` / `shop_earning`.
+- **Order flow:** customer order is `pending` → **only the admin** refers it → the shop confirms, processes, ships and delivers. Shops see an order only after it is referred (RLS + trigger `guard_status`).
+- **Commission:** trigger `generate_commission` (rate in `platform_settings`, editable by the admin under Admin → Settings).
+- **Delivery charge:** set per shop (Shop → Settings), calculated by `place_order()`. Only `delivered` creates a `commissions` row and sets `commission_amount` / `shop_earning`.
 - **Prices and stock at checkout:** `place_order()` re-reads prices server-side and decrements stock; a cancelled order restocks.
 - **Access control:** RLS — customers see their orders, shops see their own products/orders, admin sees everything. Order inserts are only possible through `place_order()`.
 

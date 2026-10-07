@@ -5,7 +5,7 @@ import { ImagePlus, X } from 'lucide-react';
 import { useQuery } from '@/lib/hooks';
 import { publicCategories } from '@/lib/services/analytics';
 import { saveProduct } from '@/lib/services/products';
-import { useToast } from './Providers';
+import { usePlatform, useToast } from './Providers';
 import { COLOR_HEX } from '@/lib/seed';
 import { rs, finalPrice } from '@/lib/format';
 import type { Product } from '@/lib/types';
@@ -15,6 +15,7 @@ const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free', '2-3Y', '4-5Y', '6-7Y',
 export default function ProductForm({ shopId, initial }: { shopId: string; initial?: Product }) {
   const router = useRouter(); const toast = useToast();
   const cats = useQuery(publicCategories);
+  const { rate, pct } = usePlatform();
   const [f, setF] = useState({
     name: initial?.name ?? '', category_id: initial?.category_id ?? '', description: initial?.description ?? '', price: String(initial?.price ?? ''),
     discount_percent: String(initial?.discount_percent ?? 0), stock: String(initial?.stock ?? ''), sizes: initial?.sizes ?? [] as string[],
@@ -70,7 +71,7 @@ export default function ProductForm({ shopId, initial }: { shopId: string; initi
         <div><label className="label" htmlFor="p">Price (Rs.)</label><input id="p" inputMode="numeric" className="input" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} /><Err k="price" /></div>
         <div><label className="label" htmlFor="di">Discount (%)</label><input id="di" inputMode="numeric" className="input" value={f.discount_percent} onChange={(e) => setF({ ...f, discount_percent: e.target.value })} /><Err k="discount_percent" /></div>
         <div><label className="label" htmlFor="s">Stock quantity</label><input id="s" inputMode="numeric" className="input" value={f.stock} onChange={(e) => setF({ ...f, stock: e.target.value })} /><Err k="stock" /></div>
-        {+f.price > 0 && <p className="rounded-lg bg-indigo-50 p-3 text-xs text-slate-700">Customers pay <b>{rs(finalPrice(+f.price, +f.discount_percent || 0))}</b>. If delivered you keep <b>{rs(finalPrice(+f.price, +f.discount_percent || 0) * 0.95)}</b> after 5% commission.</p>}
+        {+f.price > 0 && <p className="rounded-lg bg-indigo-50 p-3 text-xs text-slate-700">Customers pay <b>{rs(finalPrice(+f.price, +f.discount_percent || 0))}</b>. If delivered you keep <b>{rs(finalPrice(+f.price, +f.discount_percent || 0) * (1 - rate))}</b> after {pct} commission.</p>}
         <button className="btn btn-primary w-full py-3" disabled={busy}>{busy ? 'Saving…' : initial ? 'Save changes' : 'Publish product'}</button>
       </aside>
     </form>

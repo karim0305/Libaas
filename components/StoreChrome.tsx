@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Menu, Search, ShoppingBag, User, X, LayoutDashboard, LogOut, Package } from 'lucide-react';
-import { useAuth, useCart } from './Providers';
+import { useAuth, useCart, usePlatform } from './Providers';
 import { publicCategories } from '@/lib/services/analytics';
 import type { Category } from '@/lib/types';
 
@@ -30,7 +30,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="bg-indigo-800 py-1.5 text-center text-xs text-indigo-100">Cash on delivery across Pakistan · Free delivery on orders above Rs. 5,000</div>
+      <div className="bg-indigo-800 py-1.5 text-center text-xs text-indigo-100">Cash on delivery across Pakistan · Delivery charges are set by each shop</div>
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
         <button className="btn btn-ghost !p-2 lg:hidden" aria-label="Open menu" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         <Logo />
@@ -81,13 +81,14 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const { pct } = usePlatform();
   return (
     <footer className="mt-20 bg-indigo-900 text-indigo-100">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div><Logo light /><p className="mt-4 max-w-xs text-sm text-indigo-200">One marketplace for Pakistan’s clothing shops. Order online, pay when it arrives.</p></div>
         <div><h4 className="mb-3 font-semibold text-white">Shop</h4><ul className="space-y-2 text-sm"><li><Link href="/products" className="hover:text-white">All products</Link></li><li><Link href="/shops" className="hover:text-white">Browse shops</Link></li><li><Link href="/orders" className="hover:text-white">Track my order</Link></li></ul></div>
-        <div><h4 className="mb-3 font-semibold text-white">Sell with us</h4><ul className="space-y-2 text-sm"><li><Link href="/register-shop" className="hover:text-white">Open a shop</Link></li><li><Link href="/login?as=shop" className="hover:text-white">Shop login</Link></li><li className="text-indigo-300">5% commission, only on delivered orders</li></ul></div>
-        <div><h4 className="mb-3 font-semibold text-white">Help</h4><ul className="space-y-2 text-sm text-indigo-200"><li>Cash on delivery in 500+ cities</li><li>7-day returns on unworn items</li><li>help@libaas.pk · 0800 55 22 11</li></ul></div>
+        <div><h4 className="mb-3 font-semibold text-white">Sell with us</h4><ul className="space-y-2 text-sm"><li><Link href="/register-shop" className="hover:text-white">Open a shop</Link></li><li><Link href="/login?as=shop" className="hover:text-white">Shop login</Link></li><li className="text-indigo-300">{pct} commission, only on delivered orders</li></ul></div>
+        <div><h4 className="mb-3 font-semibold text-white">Help</h4><ul className="space-y-2 text-sm text-indigo-200"><li>Cash on delivery in 500+ cities</li><li>7-day returns on unworn items</li><li>help@libaas.pk · 0800 55 22 11</li><li><Link href="/terms" className="hover:text-white">Terms &amp; Conditions</Link></li></ul></div>
       </div>
       <div className="border-t border-indigo-700 py-5 text-center text-xs text-indigo-300">© {new Date().getFullYear()} Libaas Marketplace. All prices in Pakistani Rupees.</div>
     </footer>

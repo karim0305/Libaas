@@ -7,6 +7,8 @@ function view(p: Product): ProductView {
   return {
     ...p,
     shop_name: db.shops.find((s) => s.id === p.shop_id)?.name ?? 'Shop',
+    delivery_charge: db.shops.find((s) => s.id === p.shop_id)?.delivery_charge ?? 0,
+    free_delivery_above: db.shops.find((s) => s.id === p.shop_id)?.free_delivery_above ?? null,
     category_name: db.categories.find((c) => c.id === p.category_id)?.name ?? 'Clothing',
     final_price: finalPrice(p.price, p.discount_percent),
   };

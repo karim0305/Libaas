@@ -1,2 +1,3 @@
 import SettingsPanel from '@/components/SettingsPanel';
-export default function Page() { return <SettingsPanel />; }
+import DeliverySettings from '@/components/DeliverySettings';
+export default function Page() { return <SettingsPanel><DeliverySettings /></SettingsPanel>; }

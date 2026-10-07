@@ -1,12 +1,11 @@
 /**
- * Display-side commission maths.
- * The source of truth is the Postgres trigger `generate_commission` (see supabase/migrations),
- * which writes commission_amount / shop_earning when an order becomes "delivered".
- * These helpers only format previews (e.g. "what will I earn on this order").
+ * The live commission rate is stored in the database (platform_settings.commission_rate) and edited by the admin
+ * under Admin → Settings. Components read it with usePlatform(). This default is only a first-paint fallback.
+ * The database trigger `generate_commission` is the source of truth for real amounts.
  */
-export const COMMISSION_RATE = 0.05;
+export const DEFAULT_COMMISSION_RATE = 0.05;
 
-export function previewCommission(subtotal: number) {
-  const commission = Math.round(subtotal * COMMISSION_RATE);
+export function previewCommission(subtotal: number, rate: number) {
+  const commission = Math.round(subtotal * rate);
   return { commission, shopEarning: subtotal - commission };
 }
