@@ -61,6 +61,7 @@ export default function Checkout() {
         <aside className="card h-fit p-5">
           <h2 className="text-lg font-semibold">Your order</h2>
           <ul className="mt-4 divide-y divide-line text-sm">{rows.map(({ l, p }) => <li key={`${l.product_id}${l.size}${l.color}`} className="flex justify-between gap-3 py-2.5"><span>{p!.name}<span className="block text-xs text-slate-500">{l.size} · {l.color} · Qty {l.quantity}</span></span><span className="font-medium">{rs(p!.final_price * l.quantity)}</span></li>)}</ul>
+          {del.shops.length > 1 && <p className="mt-3 rounded-lg bg-marigold-50 p-3 text-xs text-slate-700">Your cart has items from <b>{del.shops.length} shops</b>, so you’ll get <b>{del.shops.length} separate orders</b> with their own order numbers, delivery charges and delivery dates. You pay each one in cash when it arrives.</p>}
           <dl className="mt-3 space-y-2 border-t border-line pt-3 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{rs(subtotal)}</dd></div>{del.shops.map((s) => <div key={s.shop_id} className="flex justify-between gap-3"><dt>Delivery{del.shops.length > 1 ? ` · ${s.shop_name}` : ''}</dt><dd>{s.charge ? rs(s.charge) : 'Free'}</dd></div>)}<div className="flex justify-between text-base font-semibold"><dt>Pay on delivery</dt><dd>{rs(subtotal + del.total)}</dd></div></dl>
           <button className="btn btn-gold mt-5 w-full py-3" disabled={busy || q.loading}>{busy ? 'Placing order…' : 'Place order'}</button>
         </aside>

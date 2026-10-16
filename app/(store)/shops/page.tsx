@@ -1,4 +1,5 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import { useQuery } from '@/lib/hooks';
@@ -9,7 +10,7 @@ export default function ShopsPage() {
   const q = useQuery(() => listShops({ activeOnly: true }));
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
-      <h1 className="text-3xl font-semibold">Shops on Libaas</h1>
+      <h1 className="text-3xl font-semibold">Shops on {BRAND.name}</h1>
       <p className="mt-1 text-slate-500">Every shop is reviewed before it can sell.</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {q.loading ? Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-36" />) : q.error ? <div className="col-span-full"><ErrorState message={q.error} retry={q.reload} /></div> :

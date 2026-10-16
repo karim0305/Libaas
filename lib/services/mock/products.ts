@@ -24,7 +24,7 @@ export async function listProducts(f: ProductFilters = {}): Promise<ProductView[
   await delay(); ensureHydrated();
   const q = f.q?.trim().toLowerCase();
   let list = db.products.filter((p) => shopActive(p.shop_id)).map(view);
-  if (q) list = list.filter((p) => `${p.name} ${p.shop_name} ${p.category_name}`.toLowerCase().includes(q));
+  if (q) list = list.filter((p) => `${p.name} ${p.shop_name} ${p.category_name} ${p.code}`.toLowerCase().includes(q));
   if (f.category) list = list.filter((p) => p.category_id === f.category);
   if (f.shop) list = list.filter((p) => p.shop_id === f.shop);
   if (f.size) list = list.filter((p) => p.sizes.includes(f.size!));
@@ -70,7 +70,8 @@ export async function listAllProducts(): Promise<ProductView[]> {
 }
 
 export async function saveProduct(input: Omit<Product, 'id' | 'created_at' | 'sold'> & { id?: string }): Promise<void> {
-  await delay();
+  await delay(); ensureHydrated();
+  if (db.products.some((p) => p.code.toLowerCase() === input.code.toLowerCase() && p.id !== input.id)) throw new Error('That product code is already used. Choose a different number.');
   mutate(() => {
     if (input.id) {
       const i = db.products.findIndex((p) => p.id === input.id);

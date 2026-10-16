@@ -2,6 +2,14 @@ import { db, delay, ensureHydrated, mutate, uid } from '../../store';
 import type { Profile, Shop, ShopStatus } from '../../types';
 
 /* TODO(supabase): shops table; owner = auth.uid(); admin approval flips `status`. */
+/** First 3 letters of the shop name; a number is added if another shop already has them. */
+function makeShopCode(name: string) {
+  const base = (name.replace(/[^a-zA-Z]/g, '') + 'XXX').slice(0, 3).toUpperCase();
+  let code = base; let n = 1;
+  while (db.shops.some((s) => s.shop_code === code)) code = base + ++n;
+  return code;
+}
+
 export async function listShops(opts: { activeOnly?: boolean } = {}): Promise<(Shop & { product_count: number })[]> {
   await delay(); ensureHydrated();
   return db.shops
@@ -32,7 +40,7 @@ export async function registerShop(input: { owner_name: string; email: string; p
   const user: Profile = { id: userId, email: input.email, name: input.owner_name, phone: input.phone, role: 'shop', shop_id: shopId };
   mutate(() => {
     db.profiles.push(user);
-    db.shops.push({ id: shopId, owner_id: userId, name: input.shop_name, slug: input.shop_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: input.description, city: input.city, phone: input.phone, status: 'pending', delivery_charge: 250, free_delivery_above: 5000, created_at: new Date().toISOString() });
+    db.shops.push({ id: shopId, owner_id: userId, name: input.shop_name, slug: input.shop_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: input.description, city: input.city, phone: input.phone, status: 'pending', shop_code: makeShopCode(input.shop_name), delivery_charge: 250, free_delivery_above: 5000, created_at: new Date().toISOString() });
   });
   localStorage.setItem('libaas_session', userId);
   return user;

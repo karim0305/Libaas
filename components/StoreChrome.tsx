@@ -1,17 +1,22 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Menu, Search, ShoppingBag, User, X, LayoutDashboard, LogOut, Package } from 'lucide-react';
 import { useAuth, useCart, usePlatform } from './Providers';
+import AnnouncementBar from './home/AnnouncementBar';
 import { publicCategories } from '@/lib/services/analytics';
 import type { Category } from '@/lib/types';
 
 export function Logo({ light = false }: { light?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2" aria-label="Libaas home">
-      <span className="grid h-9 w-9 place-items-center rounded-lg bg-crimson font-display text-lg font-bold text-white">ل</span>
-      <span className={`font-display text-xl font-bold tracking-tight ${light ? 'text-white' : 'text-indigo-800'}`}>Libaas</span>
+    <Link href="/" className="flex items-center gap-2.5" aria-label={`${BRAND.name} home`}>
+      <img src="/logo-mark.png" alt="" width={58} height={46} className="h-11 w-auto" />
+      <span className="flex flex-col leading-none">
+        <span className={`font-brand text-[19px] font-bold uppercase tracking-[0.05em] ${light ? 'text-[#E9C873]' : 'text-[#8A6A1F]'}`}>{BRAND.first}</span>
+        <span className={`mt-1 font-brand text-[10.5px] font-semibold uppercase tracking-[0.34em] ${light ? 'text-[#CDAA55]' : 'text-[#A8842F]'}`}>{BRAND.second}</span>
+      </span>
     </Link>
   );
 }
@@ -30,7 +35,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="bg-indigo-800 py-1.5 text-center text-xs text-indigo-100">Cash on delivery across Pakistan · Delivery charges are set by each shop</div>
+      <AnnouncementBar />
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
         <button className="btn btn-ghost !p-2 lg:hidden" aria-label="Open menu" onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
         <Logo />
@@ -40,7 +45,7 @@ export function SiteHeader() {
         </form>
         <nav className="ml-auto flex items-center gap-1">
           <Link href="/shops" className="btn btn-ghost hidden lg:inline-flex">Shops</Link>
-          <Link href="/register-shop" className="btn btn-ghost hidden lg:inline-flex">Sell on Libaas</Link>
+          <Link href="/register-shop" className="btn btn-ghost hidden lg:inline-flex">Sell on {BRAND.name}</Link>
           {user ? (
             <div className="relative">
               <button className="btn btn-ghost" onClick={() => setMenu(!menu)} aria-haspopup="menu" aria-expanded={menu}><User size={18} /><span className="hidden sm:inline">{user.name.split(' ')[0]}</span></button>
@@ -72,7 +77,7 @@ export function SiteHeader() {
           <ul className="grid grid-cols-2 gap-1 text-sm">
             {cats.map((c) => <li key={c.id}><Link onClick={() => setOpen(false)} href={`/products?category=${c.id}`} className="block rounded-lg px-3 py-2 hover:bg-surface">{c.name}</Link></li>)}
             <li><Link onClick={() => setOpen(false)} href="/shops" className="block rounded-lg px-3 py-2 font-semibold hover:bg-surface">All shops</Link></li>
-            <li><Link onClick={() => setOpen(false)} href="/register-shop" className="block rounded-lg px-3 py-2 font-semibold hover:bg-surface">Sell on Libaas</Link></li>
+            <li><Link onClick={() => setOpen(false)} href="/register-shop" className="block rounded-lg px-3 py-2 font-semibold hover:bg-surface">Sell on {BRAND.name}</Link></li>
           </ul>
         </div>
       )}
@@ -88,9 +93,9 @@ export function SiteFooter() {
         <div><Logo light /><p className="mt-4 max-w-xs text-sm text-indigo-200">One marketplace for Pakistan’s clothing shops. Order online, pay when it arrives.</p></div>
         <div><h4 className="mb-3 font-semibold text-white">Shop</h4><ul className="space-y-2 text-sm"><li><Link href="/products" className="hover:text-white">All products</Link></li><li><Link href="/shops" className="hover:text-white">Browse shops</Link></li><li><Link href="/orders" className="hover:text-white">Track my order</Link></li></ul></div>
         <div><h4 className="mb-3 font-semibold text-white">Sell with us</h4><ul className="space-y-2 text-sm"><li><Link href="/register-shop" className="hover:text-white">Open a shop</Link></li><li><Link href="/login?as=shop" className="hover:text-white">Shop login</Link></li><li className="text-indigo-300">{pct} commission, only on delivered orders</li></ul></div>
-        <div><h4 className="mb-3 font-semibold text-white">Help</h4><ul className="space-y-2 text-sm text-indigo-200"><li>Cash on delivery in 500+ cities</li><li>7-day returns on unworn items</li><li>help@libaas.pk · 0800 55 22 11</li><li><Link href="/terms" className="hover:text-white">Terms &amp; Conditions</Link></li></ul></div>
+        <div><h4 className="mb-3 font-semibold text-white">Help</h4><ul className="space-y-2 text-sm text-indigo-200"><li>Cash on delivery in 500+ cities</li><li>7-day returns on unworn items</li><li>{BRAND.email} · {BRAND.phone}</li><li><Link href="/terms" className="hover:text-white">Terms &amp; Conditions</Link></li></ul></div>
       </div>
-      <div className="border-t border-indigo-700 py-5 text-center text-xs text-indigo-300">© {new Date().getFullYear()} Libaas Marketplace. All prices in Pakistani Rupees.</div>
+      <div className="border-t border-indigo-700 py-5 text-center text-xs text-indigo-300">© {new Date().getFullYear()} {BRAND.name}. All prices in Pakistani Rupees.</div>
     </footer>
   );
 }

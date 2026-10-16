@@ -3,15 +3,16 @@
  * Services in lib/services/* are the ONLY consumers — swap their bodies for supabase queries
  * and nothing in the UI changes.
  */
-import { categories, orders, products, profiles, shops } from './seed';
-import type { Category, Order, Product, Profile, Shop } from './types';
+import { announcements, banners, categories, commissionPayments, homeSections, orders, products, profiles, reviews, shops } from './seed';
+import type { Announcement, Banner, Category, CommissionPayment, HomeSection, Order, Product, Profile, Review, Shop } from './types';
 
-interface DB { shops: Shop[]; products: Product[]; categories: Category[]; profiles: Profile[]; orders: Order[]; settings: { commission_rate: number } }
+interface DB { shops: Shop[]; products: Product[]; categories: Category[]; profiles: Profile[]; orders: Order[]; settings: { commission_rate: number }; announcements: Announcement[]; banners: Banner[]; sections: HomeSection[]; reviews: Review[]; payments: CommissionPayment[] }
 
-const KEY = 'libaas_db_v2';
+const KEY = 'libaas_db_v5';
 export const db: DB = {
   shops: structuredClone(shops), products: structuredClone(products), categories: structuredClone(categories),
   profiles: structuredClone(profiles), orders: structuredClone(orders), settings: { commission_rate: 0.05 },
+  announcements: structuredClone(announcements), banners: structuredClone(banners), sections: structuredClone(homeSections), reviews: structuredClone(reviews), payments: structuredClone(commissionPayments),
 };
 
 let hydrated = false;

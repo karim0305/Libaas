@@ -10,12 +10,16 @@ import ProductImage from '@/components/ui/ProductImage';
 import ProductCard from '@/components/ui/ProductCard';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
 import { COLOR_HEX } from '@/lib/seed';
+import { listProductReviews } from '@/lib/services/reviews';
+import ProductReviews, { averageRating } from '@/components/ProductReviews';
+import { Stars } from '@/components/ui/Stars';
 import { rs } from '@/lib/format';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const { id } = params;
   const q = useQuery(() => getProduct(id), [id]);
   const rel = useQuery(() => relatedProducts(id), [id]);
+  const rv = useQuery(() => listProductReviews(id), [id]);
   const cart = useCart(); const toast = useToast(); const router = useRouter();
   const [size, setSize] = useState(''); const [color, setColor] = useState(''); const [qty, setQty] = useState(1); const [img, setImg] = useState(0);
   const p = q.data;
@@ -42,6 +46,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div>
           <Link href={`/shops/${p.shop_id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-crimson hover:underline"><Store size={15} />{p.shop_name}</Link>
           <h1 className="mt-2 text-3xl font-semibold">{p.name}</h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+            <span>Product code: <span className="font-mono font-semibold text-slate-700">{p.code}</span></span>
+            {rv.data && rv.data.length > 0 && <a href="#reviews" className="flex items-center gap-1.5 hover:text-indigo-800"><Stars value={averageRating(rv.data)} size={15} />{averageRating(rv.data).toFixed(1)} ({rv.data.length})</a>}
+          </div>
           <div className="mt-3 flex items-baseline gap-3"><span className="font-display text-3xl font-bold text-indigo-800">{rs(p.final_price)}</span>{p.discount_percent > 0 && <><span className="text-lg text-slate-400 line-through">{rs(p.price)}</span><span className="rounded-md bg-crimson px-2 py-0.5 text-xs font-bold text-white">Save {p.discount_percent}%</span></>}</div>
           <p className="mt-5 max-w-prose leading-relaxed text-slate-600">{p.description}</p>
 
@@ -57,6 +65,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           <p className="mt-6 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-800">Cash on delivery. You pay {rs(p.final_price * qty)} when the order reaches you.</p>
         </div>
       </div>
+      <ProductReviews reviews={rv.data ?? []} loading={rv.loading} />
       {rel.data && rel.data.length > 0 && <section className="mt-16"><h2 className="mb-6 text-2xl font-semibold">You may also like</h2><div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4">{rel.data.map((r) => <ProductCard key={r.id} p={r} />)}</div></section>}
     </div>
   );

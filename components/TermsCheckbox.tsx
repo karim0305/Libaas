@@ -1,21 +1,22 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import Link from 'next/link';
 import { usePlatform } from './Providers';
 
 const CUSTOMER = [
-  'Libaas is an advertising platform. Products are sold and delivered by the shops, not by Libaas.',
-  'If you receive a wrong, damaged or faulty item, contact the shop directly. Libaas is not responsible for product quality, delivery or refunds.',
+  `${BRAND.name} is an advertising platform. Products are sold and delivered by the shops, not by ${BRAND.name}.`,
+  `If you receive a wrong, damaged or faulty item, contact the shop directly. ${BRAND.name} is not responsible for product quality, delivery or refunds.`,
   'Orders are cash on delivery. If you refuse an order or don’t pay, the shop or its delivery company deals with you directly, and your account may be blocked.',
 ];
 
 export default function TermsCheckbox({ checked, onChange, kind }: { checked: boolean; onChange: (v: boolean) => void; kind: 'customer' | 'shop' }) {
   const { pct } = usePlatform();
   const points = kind === 'customer' ? CUSTOMER : [
-    'Libaas only advertises your products. You are responsible for everything you list and send: genuine, legal and as described.',
-    'If you send a wrong or faulty product, you deal with the customer. Libaas is not liable.',
-    'If a customer doesn’t pay, you or your delivery company bear the loss. Libaas does not pay shops for unpaid orders.',
-    `Libaas charges ${pct} commission on the product value of delivered orders, and you must pay it as Libaas communicates.`,
-    'Illegal, counterfeit or prohibited items mean suspension, and Libaas may report them to the authorities.',
+    `${BRAND.name} only advertises your products. You are responsible for everything you list and send: genuine, legal and as described.`,
+    `If you send a wrong or faulty product, you deal with the customer. ${BRAND.name} is not liable.`,
+    `If a customer doesn’t pay, you or your delivery company bear the loss. ${BRAND.name} does not pay shops for unpaid orders.`,
+    `${BRAND.name} charges ${pct} commission on the product value of delivered orders, and you must pay it as ${BRAND.name} communicates.`,
+    `Illegal, counterfeit or prohibited items mean suspension, and ${BRAND.name} may report them to the authorities.`,
   ];
   return (
     <div className="rounded-lg border border-line bg-surface p-3.5 text-sm sm:col-span-2">

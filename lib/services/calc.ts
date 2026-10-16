@@ -1,4 +1,5 @@
 import type { Order, OrderStatus } from '../types';
+import { attentionFlags } from '../attention';
 
 const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
 
@@ -39,7 +40,7 @@ export function buildOverview(orders: Order[], shops: { id: string; name: string
   orders.filter((o) => o.status === 'delivered').forEach((o) => o.items.forEach((i) => prod.set(i.name, (prod.get(i.name) ?? 0) + i.quantity * i.unit_price)));
   const topProducts = [...prod.entries()].map(([name, sales]) => ({ name, sales })).sort((a, b) => b.sales - a.sales).slice(0, 5);
   return {
-    ...s, toRefer: orders.filter((o) => o.status === 'pending').length, shops: shops.length, activeShops: shops.filter((x) => x.status === 'active').length, pendingShops: shops.filter((x) => x.status === 'pending').length,
+    ...s, toRefer: orders.filter((o) => o.status === 'pending').length, attention: orders.filter((o) => attentionFlags(o).length > 0).length, shops: shops.length, activeShops: shops.filter((x) => x.status === 'active').length, pendingShops: shops.filter((x) => x.status === 'pending').length,
     customers, products, series: dailySeries(orders), topShops, topProducts,
   };
 }

@@ -7,4 +7,7 @@ export const listCustomerOrders = s.listCustomerOrders;
 export const listShopOrders = s.listShopOrders;
 export const listAllOrders = s.listAllOrders;
 export const updateOrderStatus = s.updateOrderStatus;
+export const confirmReceipt = s.confirmReceipt;
+export const disputeCancellation = s.disputeCancellation;
+export const markChecked = s.markChecked;
 export { nextStatuses } from './calc';

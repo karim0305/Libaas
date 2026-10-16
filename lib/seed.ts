@@ -36,7 +36,7 @@ export const profiles: Profile[] = [
   { id: 'u-c6', email: 'zain@example.com', name: 'Zain Abbas', role: 'customer', phone: '0345 6789012' },
 ];
 
-const baseShops: Omit<Shop, 'delivery_charge' | 'free_delivery_above'>[] = [
+const baseShops: Omit<Shop, 'delivery_charge' | 'free_delivery_above' | 'shop_code'>[] = [
   { id: 's1', owner_id: 'u-s1', name: 'Khaddar House', slug: 'khaddar-house', city: 'Lahore', phone: '0300 1112233', status: 'active', created_at: daysAgo(160),
     description: 'Hand-picked khaddar and cotton shalwar kameez, cut and stitched in Gulberg since 2009.' },
   { id: 's2', owner_id: 'u-s2', name: 'Karachi Kurta Co.', slug: 'karachi-kurta-co', city: 'Karachi', phone: '0321 4455667', status: 'active', created_at: daysAgo(140),
@@ -55,7 +55,8 @@ const baseShops: Omit<Shop, 'delivery_charge' | 'free_delivery_above'>[] = [
     description: 'Wool and pashmina shawls from Peshawar’s Qissa Khwani bazaar.' },
 ];
 const DELIVERY: [number, number | null][] = [[250, 5000], [200, 3000], [300, null], [250, 5000], [400, 10000], [150, 2000], [250, 5000], [250, 5000]];
-export const shops: Shop[] = baseShops.map((s, i) => ({ ...s, delivery_charge: DELIVERY[i][0], free_delivery_above: DELIVERY[i][1] }));
+const SHOP_CODES = ['KHA', 'KAR', 'LAW', 'MAR', 'BRI', 'LIT', 'SIA', 'SHA'];
+export const shops: Shop[] = baseShops.map((s, i) => ({ ...s, shop_code: SHOP_CODES[i], delivery_charge: DELIVERY[i][0], free_delivery_above: DELIVERY[i][1] }));
 
 type P = [string, string, string, number, number, number, string[], string[], boolean];
 const S = ['S', 'M', 'L', 'XL'];
@@ -88,8 +89,10 @@ const tmpl: P[] = [
   ['Sports Track Suit', 's7', 'c1', 3900, 0, 30, S, ['Black', 'Navy'], false],
 ];
 
+const codeCount: Record<string, number> = {};
+const nextCode = (shopId: string) => { codeCount[shopId] = (codeCount[shopId] ?? 100) + 1; return `${shops.find((s) => s.id === shopId)!.shop_code}-${codeCount[shopId]}`; };
 export const products: Product[] = tmpl.map(([name, shop_id, category_id, price, discount_percent, stock, sizes, colors, featured], i) => ({
-  id: `p${i + 1}`, shop_id, category_id, name, price, discount_percent, stock, sizes, colors, featured,
+  id: `p${i + 1}`, code: nextCode(shop_id), shop_id, category_id, name, price, discount_percent, stock, sizes, colors, featured,
   description: `${name} from ${shops.find((s) => s.id === shop_id)!.name}. Quality fabric, careful stitching and a comfortable fit for Pakistan’s seasons. Available in ${colors.join(', ').toLowerCase()}. Returns accepted within 7 days if unworn.`,
   images: [], created_at: daysAgo(Math.floor(rnd() * 60)), sold: Math.floor(rnd() * 90) + 5,
 }));
@@ -108,7 +111,7 @@ export const orders: Order[] = Array.from({ length: 64 }, (_, i) => {
   const n = 1 + Math.floor(rnd() * 2);
   const items: OrderItem[] = Array.from({ length: n }, () => {
     const p = pick(lines);
-    return { product_id: p.id, name: p.name, quantity: 1 + Math.floor(rnd() * 2), unit_price: finalPrice(p.price, p.discount_percent), size: pick(p.sizes), color: pick(p.colors) };
+    return { product_id: p.id, product_code: p.code, name: p.name, quantity: 1 + Math.floor(rnd() * 2), unit_price: finalPrice(p.price, p.discount_percent), size: pick(p.sizes), color: pick(p.colors) };
   });
   const subtotal = items.reduce((s, it) => s + it.unit_price * it.quantity, 0);
   const age = Math.floor((i / 64) * 75);
@@ -117,9 +120,48 @@ export const orders: Order[] = Array.from({ length: 64 }, (_, i) => {
   const commission_amount = delivered ? Math.round(subtotal * 0.05) : 0;
   const created_at = daysAgo(75 - age);
   const delivery_charge = shop.free_delivery_above != null && subtotal >= shop.free_delivery_above ? 0 : shop.delivery_charge;
+  const cancelled_by = status === 'cancelled' ? pick<'customer' | 'shop' | 'admin'>(['customer', 'shop', 'admin']) : null;
   return {
-    id: `o${i + 1}`, order_no: `LB-${26000 + i * 7 + 101}`, customer_id: c.id, customer_name: c.name, phone: c.phone ?? '',
+    id: `o${i + 1}`, order_no: `AKS-${26000 + i * 7 + 101}`, customer_id: c.id, customer_name: c.name, phone: c.phone ?? '',
     address: pick(streets), city: pick(cities), notes: '', shop_id: shop.id, shop_name: shop.name, status,
-    created_at, referred_at: status === 'pending' ? null : created_at, delivered_at: delivered ? created_at : null, delivery_charge, items, subtotal, commission_amount, shop_earning: delivered ? subtotal - commission_amount : 0,
+    created_at, referred_at: status === 'pending' ? null : created_at, delivered_at: delivered ? created_at : null, delivery_charge, status_changed_at: created_at, cancelled_by, cancel_reason: cancelled_by === 'shop' ? 'Customer refused delivery' : cancelled_by === 'customer' ? 'Changed my mind' : cancelled_by === 'admin' ? 'Duplicate order' : '', customer_confirmed_at: null, disputed_at: null, dispute_note: '', admin_checked_at: null, items, subtotal, commission_amount, shop_earning: delivered ? subtotal - commission_amount : 0,
   };
 }).sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+/* ---------- homepage sample content ---------- */
+import type { Announcement, Banner, HomeSection } from './types';
+export const announcements: Announcement[] = [
+  { id: 'an1', text: 'Cash on delivery across Pakistan · Delivery charges are set by each shop', link: '', link_label: '', shop_id: null, theme: 'indigo', sort_order: 0, is_active: true, starts_at: null, ends_at: null },
+  { id: 'an2', text: 'Eid collection is live. Lawn, kurtas and waistcoats from verified shops', link: '/products', link_label: 'Shop now', shop_id: null, theme: 'crimson', sort_order: 1, is_active: true, starts_at: null, ends_at: null },
+  { id: 'an3', text: 'Free delivery on bigger orders', link: '', link_label: 'Visit shop', shop_id: 's1', theme: 'gold', sort_order: 2, is_active: true, starts_at: null, ends_at: null },
+];
+export const banners: Banner[] = [
+  { id: 'b1', title: 'Eid ki shopping, ek hi jagah.', subtitle: 'Lawn from Faisalabad, kurtas from Karachi, waistcoats from Islamabad. Order from verified shops and pay cash when it reaches your door.',
+    btn1_label: 'Shop all clothing', btn1_link: '/products', btn2_label: 'Meet the shops', btn2_link: '/shops', theme: 'indigo', image_url: null, shop_id: null, product_ids: [], sort_order: 0, is_active: true, starts_at: null, ends_at: null },
+  { id: 'b2', title: 'Lawn season is here', subtitle: 'Printed and embroidered lawn straight from the textile capital of Pakistan.',
+    btn1_label: 'Visit the shop', btn1_link: '/shops/s3', btn2_label: '', btn2_link: '', theme: 'forest', image_url: null, shop_id: 's3', product_ids: [], sort_order: 1, is_active: true, starts_at: null, ends_at: null },
+];
+export const homeSections: HomeSection[] = [
+  { key: 'featured', title: 'Featured this week', mode: 'manual', shop_id: null, product_ids: products.filter((p) => p.featured).slice(0, 8).map((p) => p.id), item_limit: 4, enabled: true },
+  { key: 'popular', title: 'Popular right now', mode: 'best_selling', shop_id: null, product_ids: [], item_limit: 4, enabled: true },
+  { key: 'latest', title: 'Just added', mode: 'latest', shop_id: null, product_ids: [], item_limit: 4, enabled: true },
+];
+
+/* ---------- sample reviews (from delivered orders) ---------- */
+import type { Review } from './types';
+const COMMENTS = ['Fabric quality is excellent and the fit is perfect.', 'Delivered on time. Stitching is neat, will order again.', 'Colour is exactly as shown. Very happy.', 'Good value for the price. Packaging was careful.', 'Size ran slightly large but the quality is great.', 'Beautiful embroidery, got many compliments at Eid.'];
+const RATINGS = [5, 5, 4, 5, 4, 5, 3, 5, 4, 5, 5, 4, 5, 4];
+const shortName = (n: string) => { const [f, l] = n.split(' '); return l ? `${f} ${l[0]}.` : f; };
+export const reviews: Review[] = orders.filter((o) => o.status === 'delivered').slice(0, 14).map((o, i) => ({
+  id: `r${i + 1}`, order_id: o.id, product_id: o.items[0].product_id, shop_id: o.shop_id, customer_id: o.customer_id, customer_name: shortName(o.customer_name),
+  rating: RATINGS[i], comment: COMMENTS[i % COMMENTS.length], is_hidden: false, created_at: o.created_at,
+}));
+
+/* ---------- sample commission payments ---------- */
+import type { CommissionPayment } from './types';
+const dayStr = (n: number) => new Date(Date.now() - n * 86400000).toLocaleDateString('en-CA');
+export const commissionPayments: CommissionPayment[] = [
+  { id: 'cp1', shop_id: 's1', paid_on: dayStr(20), amount: 1500, comment: 'Bank transfer, ref 88421', status: 'received', received_at: new Date(Date.now() - 19 * 86400000).toISOString(), created_at: new Date(Date.now() - 20 * 86400000).toISOString() },
+  { id: 'cp2', shop_id: 's1', paid_on: dayStr(3), amount: 1200, comment: 'JazzCash', status: 'not_received', received_at: null, created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+  { id: 'cp3', shop_id: 's2', paid_on: dayStr(6), amount: 900, comment: 'Easypaisa, TID 7741', status: 'not_received', received_at: null, created_at: new Date(Date.now() - 6 * 86400000).toISOString() },
+];

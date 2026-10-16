@@ -8,6 +8,7 @@ import { dailySeries, summarize } from '@/lib/services/analytics';
 import { usePlatform } from '@/components/Providers';
 import StatCard from '@/components/ui/StatCard';
 import CommissionExplainer from '@/components/CommissionExplainer';
+import PaymentsAdmin from '@/components/admin/PaymentsAdmin';
 import { ChartCard, LineSeries } from '@/components/charts';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
 import { rs, shortDate } from '@/lib/format';
@@ -88,6 +89,8 @@ export default function Commissions() {
 
       <div className="card overflow-hidden"><h2 className="border-b border-line p-4 text-base font-semibold">Latest commission entries</h2>
         <div className="overflow-x-auto"><table className="w-full"><thead><tr><th className="th">Order</th><th className="th">Shop</th><th className="th">Delivered</th><th className="th text-right">Order amount</th><th className="th text-right">Commission</th><th className="th text-right">Shop earning</th></tr></thead><tbody className="divide-y divide-line">{ledger.map((x) => <tr key={x.id}><td className="td font-semibold text-indigo-800">{x.order_no}</td><td className="td">{x.shop_name}</td><td className="td text-slate-500">{shortDate(x.delivered_at ?? x.created_at)}</td><td className="td text-right">{rs(x.subtotal)}</td><td className="td text-right text-crimson">{rs(x.commission_amount)}</td><td className="td text-right text-green-700">{rs(x.shop_earning)}</td></tr>)}</tbody></table></div></div>
+
+      <PaymentsAdmin />
     </div>
   );
 }

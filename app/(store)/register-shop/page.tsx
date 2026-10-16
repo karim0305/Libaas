@@ -1,4 +1,5 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, usePlatform, useToast } from '@/components/Providers';
@@ -20,7 +21,7 @@ export default function RegisterShop() {
   };
   return (
     <div className="mx-auto max-w-2xl px-4 py-14">
-      <h1 className="text-3xl font-semibold">Open your shop on Libaas</h1>
+      <h1 className="text-3xl font-semibold">Open your shop on {BRAND.name}</h1>
       <p className="mt-2 text-slate-600">List your clothing, receive cash-on-delivery orders and keep {+(100 - rate * 100).toFixed(2)}% of every delivered sale. We only charge {pct} commission when an order is delivered.</p>
       <form onSubmit={submit} className="card mt-8 grid gap-4 p-6 sm:grid-cols-2">
         <div><label className="label" htmlFor="o">Your name</label><input id="o" required className="input" value={f.owner_name} onChange={on('owner_name')} /></div>

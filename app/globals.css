@@ -25,14 +25,16 @@ h1, h2, h3, h4 { @apply font-display tracking-tight text-indigo-800; }
 
 /* ajrak-inspired lattice used behind the hero */
 .lattice {
-  background-color: #1E2A5A;
+  background-color: var(--lat-bg, #1E2A5A);
   background-image:
-    linear-gradient(45deg, rgba(240,162,2,.14) 25%, transparent 25%, transparent 75%, rgba(240,162,2,.14) 75%),
-    linear-gradient(45deg, rgba(163,22,47,.35) 25%, transparent 25%, transparent 75%, rgba(163,22,47,.35) 75%);
+    linear-gradient(45deg, var(--lat-a, rgba(240,162,2,.14)) 25%, transparent 25%, transparent 75%, var(--lat-a, rgba(240,162,2,.14)) 75%),
+    linear-gradient(45deg, var(--lat-b, rgba(163,22,47,.35)) 25%, transparent 25%, transparent 75%, var(--lat-b, rgba(163,22,47,.35)) 75%);
   background-size: 56px 56px;
   background-position: 0 0, 28px 28px;
 }
 .toast-in { animation: toast-in .22s ease-out; }
+.slide-in { animation: slide-in .45s ease-out; }
+@keyframes slide-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .skeleton { @apply animate-pulse rounded-md bg-slate-200/70; }
-@media (prefers-reduced-motion: reduce) { .toast-in, .skeleton { animation: none; } html { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .toast-in, .slide-in, .skeleton { animation: none; } html { scroll-behavior: auto; } }

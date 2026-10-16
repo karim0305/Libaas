@@ -1,0 +1,11 @@
+import { isSupabaseConfigured } from '../supabase/client';
+import * as mock from './mock/reviews';
+import * as live from './supabase/reviews';
+const s = isSupabaseConfigured ? live : mock;
+export const listProductReviews = s.listProductReviews;
+export const listHomeReviews = s.listHomeReviews;
+export const listMyReviews = s.listMyReviews;
+export const listShopReviews = s.listShopReviews;
+export const listAllReviews = s.listAllReviews;
+export const submitReview = s.submitReview;
+export const setReviewHidden = s.setReviewHidden;

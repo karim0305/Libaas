@@ -1,5 +1,5 @@
 'use client';
-import { LayoutDashboard, Store, Package, Tags, Users, ShoppingCart, Percent, FileBarChart, Settings } from 'lucide-react';
+import { LayoutDashboard, LayoutTemplate, Star, Store, Package, Tags, Users, ShoppingCart, Percent, FileBarChart, Settings } from 'lucide-react';
 import RequireRole from '@/components/RequireRole';
 import DashboardShell from '@/components/DashboardShell';
 
@@ -8,8 +8,10 @@ const nav = [
   { href: '/admin/shops', label: 'Shops', icon: Store },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
+  { href: '/admin/homepage', label: 'Homepage', icon: LayoutTemplate },
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/commissions', label: 'Commissions', icon: Percent },
   { href: '/admin/reports', label: 'Reports', icon: FileBarChart },
   { href: '/admin/settings', label: 'Settings', icon: Settings },

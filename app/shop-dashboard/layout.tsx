@@ -1,7 +1,8 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, PlusSquare, ShoppingCart, BarChart3, Wallet, Store, Settings, Clock, Ban } from 'lucide-react';
+import { LayoutDashboard, Package, PlusSquare, ShoppingCart, BarChart3, Wallet, Store, Settings, Clock, Ban, Star, Banknote } from 'lucide-react';
 import RequireRole from '@/components/RequireRole';
 import DashboardShell from '@/components/DashboardShell';
 import { Logo } from '@/components/StoreChrome';
@@ -16,14 +17,16 @@ const nav = [
   { href: '/shop-dashboard/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/shop-dashboard/sales', label: 'Sales', icon: BarChart3 },
   { href: '/shop-dashboard/earnings', label: 'Earnings', icon: Wallet },
+  { href: '/shop-dashboard/payments', label: 'Commission payments', icon: Banknote },
+  { href: '/shop-dashboard/reviews', label: 'Reviews', icon: Star },
   { href: '/shop-dashboard/profile', label: 'Shop profile', icon: Store },
   { href: '/shop-dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 const COPY = {
   pending: { icon: Clock, title: 'Your shop is waiting for approval', text: 'We’re reviewing your registration. You’ll get access to your dashboard as soon as an admin approves it.' },
-  rejected: { icon: Ban, title: 'Your shop registration was rejected', text: 'Your dashboard stays locked. Contact help@libaas.pk if you think this is a mistake.' },
-  inactive: { icon: Ban, title: 'Your shop is deactivated', text: 'An admin has switched your shop off, so the dashboard is locked and customers can’t see your products. Contact help@libaas.pk to get it reactivated.' },
+  rejected: { icon: Ban, title: 'Your shop registration was rejected', text: `Your dashboard stays locked. Contact ${BRAND.email} if you think this is a mistake.` },
+  inactive: { icon: Ban, title: 'Your shop is deactivated', text: `An admin has switched your shop off, so the dashboard is locked and customers can’t see your products. Contact ${BRAND.email} to get it reactivated.` },
   missing: { icon: Store, title: 'No shop found for this account', text: 'This account isn’t linked to a shop. Register a shop or log in with the right email.' },
 } as const;
 

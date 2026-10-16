@@ -3,7 +3,7 @@ import { must, sb, UUID } from './_client';
 import type { CartLine, CheckoutDetails, Order, OrderStatus } from '../../types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const SEL = '*, shops(name), order_items(product_id, name, quantity, unit_price, size, color)';
+const SEL = '*, shops(name), order_items(product_id, product_code, name, quantity, unit_price, size, color)';
 
 function map(r: any): Order {
   const { shops, order_items, ...o } = r;
@@ -35,7 +35,13 @@ export const listShopOrders = (shopId: string) => (UUID.test(shopId) ? list('sho
 export const listAllOrders = () => list();
 
 /** The database trigger writes commission_amount / shop_earning (at the admin’s rate) when status becomes 'delivered'. */
-export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
-  must(await sb().from('orders').update({ status }).eq('id', id));
+export async function updateOrderStatus(id: string, status: OrderStatus, extra?: { reason?: string; by?: 'customer' | 'shop' | 'admin' }): Promise<void> {
+  // the trigger decides who cancelled (customer, shop or admin) and requires a reason from shops
+  must(await sb().from('orders').update(status === 'cancelled' && extra?.reason ? { status, cancel_reason: extra.reason } : { status }).eq('id', id));
   notify();
 }
+
+/** Customer confirms they received the order -> delivered -> commission (database function confirm_receipt). */
+export async function confirmReceipt(orderId: string): Promise<void> { must(await sb().rpc('confirm_receipt', { p_order_id: orderId })); notify(); }
+export async function disputeCancellation(orderId: string, note: string): Promise<void> { must(await sb().rpc('dispute_cancellation', { p_order_id: orderId, p_note: note })); notify(); }
+export async function markChecked(orderId: string): Promise<void> { must(await sb().from('orders').update({ admin_checked_at: new Date().toISOString() }).eq('id', orderId)); notify(); }

@@ -19,7 +19,7 @@ export async function listProducts(f: ProductFilters = {}): Promise<ProductView[
   if (f.shop) q = q.eq('shop_id', f.shop);
   if (f.size) q = q.contains('sizes', [f.size]);
   if (f.featured) q = q.eq('featured', true);
-  if (f.q?.trim()) { const t = f.q.replace(/[%,()]/g, ' ').trim(); q = q.or(`name.ilike.%${t}%,description.ilike.%${t}%`); }
+  if (f.q?.trim()) { const t = f.q.replace(/[%,()]/g, ' ').trim(); q = q.or(`name.ilike.%${t}%,description.ilike.%${t}%,code.ilike.%${t}%`); }
   let list = must<any[]>(await q).map(map);
   if (f.minPrice != null) list = list.filter((p) => p.final_price >= f.minPrice!);
   if (f.maxPrice != null) list = list.filter((p) => p.final_price <= f.maxPrice!);
@@ -77,11 +77,12 @@ async function uploadImages(shopId: string, images: string[]): Promise<string[]>
 }
 
 export async function saveProduct(input: Omit<Product, 'id' | 'created_at' | 'sold'> & { id?: string }): Promise<void> {
-  const row = { shop_id: input.shop_id, category_id: input.category_id, name: input.name, description: input.description, price: input.price,
+  const row = { code: input.code, shop_id: input.shop_id, category_id: input.category_id, name: input.name, description: input.description, price: input.price,
     discount_percent: input.discount_percent, stock: input.stock, sizes: input.sizes, colors: input.colors, featured: input.featured };
   let id = input.id;
-  if (id) must(await sb().from('products').update(row).eq('id', id));
-  else id = must<any>(await sb().from('products').insert(row).select('id').single()).id as string;
+  const dup = (e: { message: string } | null) => { if (e && /products_code_key|duplicate key/i.test(e.message)) throw new Error('That product code is already used. Choose a different number.'); };
+  if (id) { const r = await sb().from('products').update(row).eq('id', id); dup(r.error); must(r); }
+  else { const r = await sb().from('products').insert(row).select('id').single(); dup(r.error); id = must<any>(r).id as string; }
 
   const urls = await uploadImages(input.shop_id, input.images);
   must(await sb().from('product_images').delete().eq('product_id', id));

@@ -6,6 +6,7 @@ import { useQuery } from '@/lib/hooks';
 import { publicCategories } from '@/lib/services/analytics';
 import { saveProduct } from '@/lib/services/products';
 import { usePlatform, useToast } from './Providers';
+import { useMyShop } from './useMyShop';
 import { COLOR_HEX } from '@/lib/seed';
 import { rs, finalPrice } from '@/lib/format';
 import type { Product } from '@/lib/types';
@@ -16,6 +17,9 @@ export default function ProductForm({ shopId, initial }: { shopId: string; initi
   const router = useRouter(); const toast = useToast();
   const cats = useQuery(publicCategories);
   const { rate, pct } = usePlatform();
+  const { shop } = useMyShop();
+  const prefix = shop?.shop_code ?? '';
+  const [codeNo, setCodeNo] = useState(initial ? initial.code.split('-').pop() ?? '' : '');
   const [f, setF] = useState({
     name: initial?.name ?? '', category_id: initial?.category_id ?? '', description: initial?.description ?? '', price: String(initial?.price ?? ''),
     discount_percent: String(initial?.discount_percent ?? 0), stock: String(initial?.stock ?? ''), sizes: initial?.sizes ?? [] as string[],
@@ -35,6 +39,8 @@ export default function ProductForm({ shopId, initial }: { shopId: string; initi
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const er: Record<string, string> = {};
+    if (!prefix) er.code = 'Your shop code is still loading. Try again in a moment.';
+    else if (!/^\d{1,6}$/.test(codeNo)) er.code = 'Enter a number of 1 to 6 digits.';
     if (f.name.trim().length < 3) er.name = 'Give the product a name.';
     if (!f.category_id) er.category_id = 'Pick a category.';
     if (!(+f.price > 0)) er.price = 'Enter a price above Rs. 0.';
@@ -45,9 +51,11 @@ export default function ProductForm({ shopId, initial }: { shopId: string; initi
     setErr(er);
     if (Object.keys(er).length) return;
     setBusy(true);
-    await saveProduct({ id: initial?.id, shop_id: shopId, name: f.name.trim(), category_id: f.category_id, description: f.description, price: +f.price, discount_percent: +f.discount_percent, stock: +f.stock, sizes: f.sizes, colors: f.colors, images: f.images, featured: initial?.featured ?? false });
+    try {
+    await saveProduct({ code: `${prefix}-${codeNo}`, id: initial?.id, shop_id: shopId, name: f.name.trim(), category_id: f.category_id, description: f.description, price: +f.price, discount_percent: +f.discount_percent, stock: +f.stock, sizes: f.sizes, colors: f.colors, images: f.images, featured: initial?.featured ?? false });
     toast(initial ? 'Product updated.' : 'Product published.');
     router.push('/shop-dashboard/products');
+    } catch (x) { toast((x as Error).message, 'error'); setBusy(false); }
   };
   const Err = ({ k }: { k: string }) => (err[k] ? <p className="mt-1 text-xs text-crimson">{err[k]}</p> : null);
 
@@ -67,6 +75,9 @@ export default function ProductForm({ shopId, initial }: { shopId: string; initi
         </div>
       </div>
       <aside className="card h-fit space-y-4 p-5">
+        <div><label className="label" htmlFor="pc">Product code</label>
+          <div className="flex"><span className="grid place-items-center rounded-l-lg border border-r-0 border-line bg-slate-100 px-3 text-sm font-semibold text-slate-600" title="Your shop’s code. It is fixed.">{prefix || '…'}-</span><input id="pc" inputMode="numeric" maxLength={6} className="input !rounded-l-none" placeholder="1042" value={codeNo} onChange={(e) => setCodeNo(e.target.value.replace(/\D/g, ''))} aria-invalid={!!err.code} /></div>
+          <Err k="code" /><p className="mt-1 text-xs text-slate-500">The first part is fixed for your shop, so codes never clash with another shop. You choose the number.</p></div>
         <div><label className="label" htmlFor="c">Category</label><select id="c" className="input" value={f.category_id} onChange={(e) => setF({ ...f, category_id: e.target.value })}><option value="">Select…</option>{(cats.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select><Err k="category_id" /></div>
         <div><label className="label" htmlFor="p">Price (Rs.)</label><input id="p" inputMode="numeric" className="input" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} /><Err k="price" /></div>
         <div><label className="label" htmlFor="di">Discount (%)</label><input id="di" inputMode="numeric" className="input" value={f.discount_percent} onChange={(e) => setF({ ...f, discount_percent: e.target.value })} /><Err k="discount_percent" /></div>

@@ -1,4 +1,5 @@
 'use client';
+import { BRAND } from '@/lib/brand';
 import { useEffect, useState } from 'react';
 import { useMyShop } from './useMyShop';
 import { useToast } from './Providers';
@@ -25,7 +26,7 @@ export default function DeliverySettings() {
   };
   return (
     <form onSubmit={save} className="card space-y-4 p-6">
-      <div><h2 className="text-lg font-semibold">Delivery charges</h2><p className="mt-1 text-sm text-slate-600">Added to every order from your shop. You collect it with the cash on delivery. Libaas takes no commission on delivery charges.</p></div>
+      <div><h2 className="text-lg font-semibold">Delivery charges</h2><p className="mt-1 text-sm text-slate-600">Added to every order from your shop. You collect it with the cash on delivery. {BRAND.name} takes no commission on delivery charges.</p></div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div><label className="label" htmlFor="dc">Delivery charge (Rs.)</label><input id="dc" inputMode="numeric" className="input" value={charge} onChange={(e) => setCharge(e.target.value)} /></div>
         <div><label className="label" htmlFor="fd">Free delivery above (Rs.)</label><input id="fd" inputMode="numeric" className="input" placeholder="Empty = never free" value={free} onChange={(e) => setFree(e.target.value)} /></div>

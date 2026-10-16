@@ -19,6 +19,7 @@ export default function AdminHome() {
   return (
     <div className="space-y-6">
       {d.toRefer > 0 && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-crimson/30 bg-crimson-50 p-4 text-sm"><span><b>{d.toRefer}</b> new order{d.toRefer > 1 ? 's are' : ' is'} waiting to be referred to a shop.</span><Link href="/admin/orders" className="btn btn-danger btn-sm">Open orders</Link></div>}
+      {d.attention > 0 && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-marigold bg-marigold-50 p-4 text-sm"><span><b>{d.attention}</b> order{d.attention > 1 ? 's need' : ' needs'} a delivery check (no update, cancelled by a shop, or disputed).</span><Link href="/admin/orders" className="btn btn-gold btn-sm">Check now</Link></div>}
       {d.pendingShops > 0 && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-marigold bg-marigold-50 p-4 text-sm"><span><b>{d.pendingShops}</b> shop{d.pendingShops > 1 ? 's are' : ' is'} waiting for approval.</span><Link href="/admin/shops" className="btn btn-gold btn-sm">Review shops</Link></div>}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total shops" value={d.shops} icon={Store} />
