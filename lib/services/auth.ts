@@ -6,3 +6,7 @@ export const getSession = s.getSession;
 export const login = s.login;
 export const registerCustomer = s.registerCustomer;
 export const logout = s.logout;
+export const requestPasswordReset = s.requestPasswordReset;
+export const verifyResetCode = s.verifyResetCode;
+export const completePasswordReset = s.completePasswordReset;
+export const cancelPasswordReset = s.cancelPasswordReset;

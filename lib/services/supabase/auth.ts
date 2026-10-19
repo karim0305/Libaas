@@ -42,3 +42,23 @@ export async function registerCustomer(name: string, email: string, phone: strin
 }
 
 export async function logout() { await sb().auth.signOut(); }
+
+/* ---------- Forgot password with a 6-digit email code ----------
+ * 1. resetPasswordForEmail  -> Supabase emails a code (the "Reset Password" email template must show {{ .Token }}).
+ * 2. verifyOtp (recovery)   -> proves the person owns the email; Supabase signs them in for a moment.
+ * 3. updateUser             -> sets the new password, then we sign out so they log in again with it. */
+export async function requestPasswordReset(email: string): Promise<{ demoCode?: string }> {
+  const { error } = await sb().auth.resetPasswordForEmail(email.trim());
+  if (error) throw new Error(/rate|seconds|too many|limit/i.test(error.message) ? 'Please wait a minute before asking for another code.' : error.message);
+  return {}; // Supabase gives the same answer whether or not the email has an account
+}
+export async function verifyResetCode(email: string, code: string): Promise<void> {
+  const { error } = await sb().auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'recovery' });
+  if (error) throw new Error('That code is wrong or has expired. Check it, or ask for a new code.');
+}
+export async function completePasswordReset(password: string): Promise<void> {
+  const { error } = await sb().auth.updateUser({ password });
+  if (error) throw new Error(/different|same/i.test(error.message) ? 'Choose a password that is different from your old one.' : /at least|weak|short/i.test(error.message) ? 'Password must be at least 6 characters.' : error.message);
+  await sb().auth.signOut(); // they must now log in again with the new password
+}
+export async function cancelPasswordReset(): Promise<void> { await sb().auth.signOut(); }

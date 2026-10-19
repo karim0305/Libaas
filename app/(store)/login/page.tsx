@@ -19,9 +19,10 @@ function Inner() {
   return (
     <div className="mx-auto max-w-md px-4 py-14">
       <h1 className="text-3xl font-semibold">Log in</h1>
+      {sp.get('reset') && <p role="status" className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">Your password was changed. Log in with your new password.</p>}
       <form onSubmit={(e) => { e.preventDefault(); go(email, password); }} className="card mt-6 space-y-4 p-6">
         <div><label className="label" htmlFor="e">Email</label><input id="e" type="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-        <div><label className="label" htmlFor="p">Password</label><input id="p" type="password" required className="input" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+        <div><div className="flex items-center justify-between"><label className="label !mb-0" htmlFor="p">Password</label><Link href="/forgot-password" className="text-sm font-semibold text-crimson hover:underline">Forgot password?</Link></div><input id="p" type="password" required className="input mt-1.5" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
         {err && <p role="alert" className="rounded-lg bg-crimson-50 p-3 text-sm text-crimson-700">{err}</p>}
         <button className="btn btn-primary w-full py-3" disabled={busy}>{busy ? 'Logging in…' : 'Log in'}</button>
         <p className="text-center text-sm text-slate-500">New here? <Link href="/register" className="font-semibold text-crimson">Create an account</Link> or <Link href="/register-shop" className="font-semibold text-crimson">open a shop</Link></p>
