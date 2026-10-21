@@ -32,8 +32,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const gallery = p.images.length ? p.images : [undefined, undefined, undefined];
   const out = p.stock === 0;
   const line = { product_id: p.id, size, color, quantity: qty };
-  const add = () => { cart.add(line); toast(`${p.name} added to your cart.`); };
-  const buyNow = () => { cart.add(line); router.push('/checkout'); };
+  const add = () => { if (cart.add(line)) toast(`${p.name} added to your cart.`); };
+  const buyNow = () => { if (cart.add(line)) router.push('/checkout'); };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

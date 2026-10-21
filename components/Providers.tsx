@@ -4,6 +4,7 @@ import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 import { getSession, logout as doLogout } from '@/lib/services/auth';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { DEFAULT_COMMISSION_RATE } from '@/lib/commission';
+import { blockedMessage } from '@/lib/roles';
 import { getPlatformSettings } from '@/lib/services/settings';
 import { subscribe } from '@/lib/store';
 import type { CartLine, Profile } from '@/lib/types';
@@ -32,9 +33,9 @@ export const usePlatform = () => useContext(PlatformCtx);
 /* ---------- Cart ---------- */
 interface CartState {
   lines: CartLine[]; count: number;
-  add: (l: CartLine) => void; setQty: (key: CartLine, qty: number) => void; remove: (l: CartLine) => void; clear: () => void;
+  add: (l: CartLine) => boolean; setQty: (key: CartLine, qty: number) => void; remove: (l: CartLine) => void; clear: () => void;
 }
-const CartCtx = createContext<CartState>({ lines: [], count: 0, add: () => {}, setQty: () => {}, remove: () => {}, clear: () => {} });
+const CartCtx = createContext<CartState>({ lines: [], count: 0, add: () => false, setQty: () => {}, remove: () => {}, clear: () => {} });
 export const useCart = () => useContext(CartCtx);
 const same = (a: CartLine, b: CartLine) => a.product_id === b.product_id && a.size === b.size && a.color === b.color;
 
@@ -73,12 +74,17 @@ export default function Providers({ children }: { children: ReactNode }) {
   const save = (l: CartLine[]) => { setLines(l); localStorage.setItem('libaas_cart', JSON.stringify(l)); };
   const cart = useMemo<CartState>(() => ({
     lines, count: lines.reduce((s, l) => s + l.quantity, 0),
-    add: (l) => save(lines.some((x) => same(x, l)) ? lines.map((x) => (same(x, l) ? { ...x, quantity: x.quantity + l.quantity } : x)) : [...lines, l]),
+    add: (l) => {
+      // only customer accounts can order
+      if (user && user.role !== 'customer') { toast(blockedMessage(user.role), 'error'); return false; }
+      save(lines.some((x) => same(x, l)) ? lines.map((x) => (same(x, l) ? { ...x, quantity: x.quantity + l.quantity } : x)) : [...lines, l]);
+      return true;
+    },
     setQty: (k, q) => save(lines.map((x) => (same(x, k) ? { ...x, quantity: Math.max(1, q) } : x))),
     remove: (k) => save(lines.filter((x) => !same(x, k))),
     clear: () => save([]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [lines]);
+  }), [lines, user?.role]);
 
   return (
     <ToastCtx.Provider value={toast}>

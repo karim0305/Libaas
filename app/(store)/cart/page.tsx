@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import { useCart, useConfirm, useToast } from '@/components/Providers';
+import { useAuth, useCart, useConfirm, useToast } from '@/components/Providers';
+import CustomerOnlyNotice from '@/components/CustomerOnlyNotice';
 import { useQuery } from '@/lib/hooks';
 import { getProductsByIds } from '@/lib/services/products';
 import ProductImage from '@/components/ui/ProductImage';
@@ -10,7 +11,7 @@ import { rs } from '@/lib/format';
 import { calcDelivery } from '@/lib/delivery';
 
 export default function CartPage() {
-  const cart = useCart(); const confirm = useConfirm(); const toast = useToast();
+  const { user } = useAuth(); const cart = useCart(); const confirm = useConfirm(); const toast = useToast();
   const ids = cart.lines.map((l) => l.product_id).join(',');
   const q = useQuery(() => getProductsByIds(cart.lines.map((l) => l.product_id)), [ids]);
 
@@ -25,6 +26,7 @@ export default function CartPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-3xl font-semibold">Your cart</h1>
+      {user && user.role !== 'customer' && <div className="mt-5"><CustomerOnlyNotice role={user.role} next="/cart" /></div>}
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <ul className="space-y-3">
           {rows.map(({ l, p }) => (

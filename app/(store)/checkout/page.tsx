@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Banknote } from 'lucide-react';
 import { useAuth, useCart, useToast } from '@/components/Providers';
+import CustomerOnlyNotice from '@/components/CustomerOnlyNotice';
 import { useQuery } from '@/lib/hooks';
 import { getProductsByIds } from '@/lib/services/products';
 import { placeOrder } from '@/lib/services/orders';
@@ -22,6 +23,7 @@ export default function Checkout() {
   useEffect(() => { if (user) setF((x) => ({ ...x, full_name: x.full_name || user.name, phone: x.phone || (user.phone ?? '') })); }, [user]);
   const on = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
 
+  if (user && user.role !== 'customer') return <div className="mx-auto max-w-2xl px-4 py-16"><h1 className="mb-5 text-3xl font-semibold">Checkout</h1><CustomerOnlyNotice role={user.role} next="/checkout" /></div>;
   if (ready && !user) return <div className="mx-auto max-w-lg px-4 py-16"><EmptyState title="Log in to place your order" text="We need an account so you can track this order afterwards." action={<Link href="/login?next=/checkout" className="btn btn-primary">Log in or register</Link>} /></div>;
   if (cart.lines.length === 0) return <div className="mx-auto max-w-lg px-4 py-16"><EmptyState title="Nothing to check out" text="Your cart is empty." action={<Link href="/products" className="btn btn-primary">Browse products</Link>} /></div>;
 

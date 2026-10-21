@@ -23,6 +23,8 @@ export async function listAllReviews(): Promise<ReviewView[]> { await delay(); e
 /** Only the customer of a DELIVERED order can review a product from it, once per order item (sending again edits it). */
 export async function submitReview(userId: string, input: { order_id: string; product_id: string; rating: number; comment: string }): Promise<void> {
   await delay(); ensureHydrated();
+  const who = db.profiles.find((p) => p.id === userId);
+  if (who && who.role !== 'customer') throw new Error('Only customer accounts can write reviews.');
   const o = db.orders.find((x) => x.id === input.order_id && x.customer_id === userId);
   if (!o) throw new Error('Order not found.');
   if (o.status !== 'delivered') throw new Error('You can review a product after the order is delivered.');

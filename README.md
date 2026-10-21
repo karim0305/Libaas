@@ -50,6 +50,7 @@ supabase/migrations/  schema, functions/triggers, RLS + storage policies
 ## Where business rules live
 
 - **Delivery verification:** the customer can confirm receipt (`confirm_receipt()`), shops must give a reason when cancelling, customers can dispute a shop's cancellation, and Admin → Orders → Delivery checks lists orders with no update for 5+ days, shop cancellations and disputes.
+- **Customer-only ordering:** shop owners and the admin cannot add to cart, check out or review; they see "Please log in from the Customer Panel…". Enforced in `place_order()` and `submit_review()` (migration 012) as well as in the UI.
 - **Forgot password (all roles):** /forgot-password -> email -> 6-digit code (Supabase `resetPasswordForEmail` + `verifyOtp` type `recovery`) -> new password -> log in again. The "Reset Password" email template in Supabase must show `{{ .Token }}`, and custom SMTP must be set so emails reach real users.
 - **Commission payments:** a shop submits date, amount and comment (Shop → Commission payments); the admin marks it received (Admin → Commissions, bottom section). Once received it is locked for both, enforced by trigger `guard_commission_payment`.
 - **Reviews:** `submit_review()` only accepts a review from the customer of a delivered order (one per item).

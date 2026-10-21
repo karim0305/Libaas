@@ -1,10 +1,13 @@
 import { db, delay, ensureHydrated, mutate, uid } from '../../store';
 import { finalPrice } from '../../format';
+import { blockedMessage } from '../../roles';
 import type { CartLine, CheckoutDetails, Order, OrderStatus } from '../../types';
 
 /* Sample-mode twin of the database logic (place_order, guard_status, generate_commission, confirm_receipt). */
 export async function placeOrder(userId: string, lines: CartLine[], d: CheckoutDetails): Promise<Order[]> {
   await delay(500); ensureHydrated();
+  const buyer = db.profiles.find((p) => p.id === userId);
+  if (buyer && buyer.role !== 'customer') throw new Error(blockedMessage(buyer.role));
   const byShop = new Map<string, CartLine[]>();
   for (const l of lines) {
     const p = db.products.find((x) => x.id === l.product_id);

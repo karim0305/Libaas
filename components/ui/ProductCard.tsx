@@ -12,7 +12,7 @@ export default function ProductCard({ p }: { p: ProductView }) {
   const toast = useToast();
   const out = p.stock === 0;
   const quickAdd = () => {
-    cart.add({ product_id: p.id, size: p.sizes[0], color: p.colors[0], quantity: 1 });
+    if (!cart.add({ product_id: p.id, size: p.sizes[0], color: p.colors[0], quantity: 1 })) return;
     toast(`${p.name} added to your cart (size ${p.sizes[0]}, ${p.colors[0]}). Change options in the cart.`);
   };
   return (
