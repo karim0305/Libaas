@@ -35,6 +35,6 @@ h1, h2, h3, h4 { @apply font-display tracking-tight text-indigo-800; }
 .toast-in { animation: toast-in .22s ease-out; }
 .slide-in { animation: slide-in .45s ease-out; }
 @keyframes slide-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 .skeleton { @apply animate-pulse rounded-md bg-slate-200/70; }
 @media (prefers-reduced-motion: reduce) { .toast-in, .slide-in, .skeleton { animation: none; } html { scroll-behavior: auto; } }

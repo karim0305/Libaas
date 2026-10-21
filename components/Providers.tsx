@@ -86,9 +86,9 @@ export default function Providers({ children }: { children: ReactNode }) {
         <AuthCtx.Provider value={{ user, ready, refresh, logout }}>
           <CartCtx.Provider value={cart}>
             <PlatformCtx.Provider value={platform}>{children}</PlatformCtx.Provider>
-            <div className="fixed bottom-4 right-4 left-4 sm:left-auto z-[100] flex flex-col gap-2 sm:w-96" aria-live="polite">
+            <div className="pointer-events-none fixed left-1/2 top-4 z-[100] flex w-[calc(100%-2rem)] -translate-x-1/2 flex-col gap-2 sm:w-96" aria-live="polite">
               {toasts.map((t) => (
-                <div key={t.id} className="toast-in flex items-start gap-3 rounded-lg bg-white border border-line shadow-lg p-3.5 text-sm">
+                <div key={t.id} className="toast-in pointer-events-auto flex items-start gap-3 rounded-lg bg-white border border-line shadow-lg p-3.5 text-sm">
                   {t.kind === 'success' ? <CheckCircle2 className="text-green-600 shrink-0" size={18} /> : t.kind === 'error' ? <AlertTriangle className="text-crimson shrink-0" size={18} /> : <Info className="text-indigo shrink-0" size={18} />}
                   <p className="flex-1 text-slate-800">{t.text}</p>
                   <button aria-label="Dismiss" onClick={() => setToasts((x) => x.filter((y) => y.id !== t.id))} className="text-slate-400 hover:text-slate-700"><X size={16} /></button>
