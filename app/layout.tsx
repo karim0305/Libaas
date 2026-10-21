@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Bricolage_Grotesque, Cormorant_Garamond, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display' });
 const body = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-body' });
@@ -16,7 +17,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${brand.variable}`}>
-      <body><Providers>{children}</Providers></body>
+      <body
+      ><Providers>
+        {children}
+         <GoogleAnalytics gaId="G-VFY4X4CG7R" />
+        </Providers></body>
     </html>
   );
 }
