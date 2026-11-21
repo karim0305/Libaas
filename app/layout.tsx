@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${brand.variable}`}>
       <head>
-        <meta name="google-adsense-account" content="ca-pub-1747222904825924" />    
+     <meta name="google-adsense-account" content="ca-pub-7915502722755454" /> 
       </head>
       <body
       ><Providers>
